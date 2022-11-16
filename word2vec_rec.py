@@ -13,6 +13,9 @@ from sklearn.metrics.pairwise import cosine_similarity
 from collections import defaultdict
 
 import config
+import sys
+# sys.path is a list of absolute path strings
+sys.path.append('/home/user/Whatscooking-/src')
 from ingredient_parser import ingredient_parser
 
 
@@ -20,10 +23,11 @@ def get_and_sort_corpus(data):
     """
     Get corpus with the documents sorted in alphabetical order
     """
+
     corpus_sorted = []
-    for doc in data.parsed.values:
-        doc.sort()
-        corpus_sorted.append(doc)
+    for doc in data.ingredients_parsed.values:
+    	doc = sorted(doc.split(' '))
+    	corpus_sorted.append(doc)
     return corpus_sorted
 
 
@@ -35,15 +39,15 @@ def get_recommendations(N, scores):
     df_recipes = pd.read_csv(config.PARSED_PATH)
     # order the scores with and filter to get the highest N scores
     top = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)[:N]
-    # create dataframe to load in recommendations
+    # create dataframe to load in recommendations	
     recommendation = pd.DataFrame(columns=["recipe", "ingredients", "score", "url"])
     count = 0
     for i in top:
-        recommendation.at[count, "recipe"] = title_parser(df_recipes["recipe_name"][i])
+        recommendation.at[count, "recipe"] = title_parser(df_recipes["title"][i])
         recommendation.at[count, "ingredients"] = ingredient_parser_final(
             df_recipes["ingredients"][i]
         )
-        recommendation.at[count, "url"] = df_recipes["recipe_urls"][i]
+        recommendation.at[count, "url"] = df_recipes["url"][i]
         recommendation.at[count, "score"] = f"{scores[i]}"
         count += 1
     return recommendation
@@ -134,7 +138,7 @@ class TfidfEmbeddingVectorizer(object):
         text_docs = []
         for doc in docs:
             text_docs.append(" ".join(doc))
-
+        #print(text_docs)
         tfidf = TfidfVectorizer()
         tfidf.fit(text_docs)  # must be list of text string
 
@@ -188,15 +192,17 @@ class TfidfEmbeddingVectorizer(object):
 
 
 def get_recs(ingredients, N=5, mean=False):
-    # load in word2vec model
+     # load in word2vec model
     model = Word2Vec.load("models/model_cbow.bin")
     model.init_sims(replace=True)
     if model:
         print("Successfully loaded model")
+        
+    req_cols = ['ingredients','url','title','ingredients_parsed']
     # load in data
-    data = pd.read_csv("input/df_parsed.csv")
+    data = pd.read_csv("input/df_parsed1.csv", usecols=req_cols, nrows=100000)
     # parse ingredients
-    data["parsed"] = data.ingredients.apply(ingredient_parser)
+    data["ingredients_parsed"] = data.ingredients.apply(ingredient_parser)
     # create corpus
     corpus = get_and_sort_corpus(data)
 
@@ -235,7 +241,8 @@ def get_recs(ingredients, N=5, mean=False):
 
 
 if __name__ == "__main__":
-    input = "chicken thigh, risdlfgbviahsddsagv, onion, rice noodle, seaweed nori sheet, sesame, shallot, soy, spinach, star, tofu"
+    input = "apple, onion, vegan"
     rec = get_recs(input)
     print(rec)
+
 

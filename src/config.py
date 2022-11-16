@@ -1,5 +1,6 @@
-RECIPES_PATH = "./input/df_recipes.csv"
-PARSED_PATH = "./input/df_parsed.csv"
-TFIDF_ENCODING_PATH = "./input/tfidf_encodings.pkl"
-TFIDF_MODEL_PATH = "./models/tfidf.pkl"
+RECIPES_PATH = "/home/user/Whatscooking-/input/clean_data.csv"
+PARSED_PATH = "/home/user/Whatscooking-/input/df_parsed1.csv"
+TFIDF_ENCODING_PATH = "/home/user/Whatscooking-/models/tfidf_encodings.pkl"
+TFIDF_MODEL_PATH = "/home/user/Whatscooking-/models/tfidf.pkl"
+
 
